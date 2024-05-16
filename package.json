@@ -1,0 +1,22 @@
+{
+  "name": "primer_integrador",
+  "version": "1.0.0",
+  "description": "El presente repositorio contiene las entregas del proyecto de una API de una tienda online para el curso de Backend en Node.js",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --watch src/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-handlebars": "^7.1.2",
+    "mongoose": "^8.3.4",
+    "node": "^20.13.1",
+    "socket.io": "^4.7.5",
+    "sweetalert2": "^11.11.0"
+  }
+}

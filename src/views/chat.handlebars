@@ -1,0 +1,82 @@
+<div class="mx-5 mt-5">
+    <h1>Chat de la Api</h1>
+    <h2>Ultimos mensajes:</h2>
+</div>
+<div id="messageLogs" class="mx-5 my-5"></div>
+<div class="d-flex mx-5 fixed-bottom mb-5 gap-1">
+    <input type="text" id="chatBox" placeholder="Ingresa tu mensaje" class="form-control bg-light border">
+    <button id="sendMessage" class="btn btn-primary btn-lg">Enviar</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  const socket = io();
+
+  // Evento 'message' recibido desde el server
+  socket.on('message', (message) => {
+    renderMessage(message);
+  });
+
+  // Evento 'click' del botón Enviar
+  document.getElementById('sendMessage').addEventListener('click', async () => {
+    const result = await Swal.fire({  
+      title: 'Ingresa tu email para poder enviar el mensaje',
+      input: 'text',
+      inputValidator: (value) => {
+        return !value && 'Necesitas ingresar el email para continuar';
+      },
+    });
+
+    const user = result.value;
+
+    if (!user) return;
+
+    const message = document.getElementById('chatBox').value;
+    if (!message.trim()) return;
+
+    socket.emit('message', { user_email: user, message: message });
+    
+    // Guardar mensaje en la base de datos (POST)
+    try {
+      await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_email: user, message: message }),
+      });
+      document.getElementById('chatBox').value = '';
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  });
+
+  // Función para renderizar un mensaje
+  function renderMessage(message) {
+    const messageLogs = document.getElementById('messageLogs');
+    const messageElement = document.createElement('div');
+    messageElement.innerHTML = `<div class="mx-5 my-5"><h6 class="text-primary">${message.user_email}:</h6><h6>${message.message}</h6></div>`;
+    messageLogs.appendChild(messageElement);
+  }
+
+  // Cargar mensajes existentes al cargar la página
+  async function fetchMessages() {
+    try {
+      const response = await fetch('/api/messages');
+      if (response.ok) {
+        const messages = await response.json();
+        messages.payload.forEach((message) => {
+          renderMessage(message);
+        });
+      } else {
+        console.error('Error fetching messages!');
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  }
+
+  fetchMessages();
+
+</script>
